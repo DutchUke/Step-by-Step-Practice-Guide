@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Step-by-Step Practice Guide</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Freeman&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh; /* Ensures the body fills the viewport */
+    }
+
+    /* Centered Title */
+    .title {
+      text-align: center;
+      font-size: 37px;
+      font-weight: bold;
+      font-family: 'Freeman', serif; /* Title font set to Freeman */
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+	
+	.sub-title {
+      text-align: center;
+      font-size: 17px;
+      margin-top: -10px;
+      margin-bottom: 20px;
+	}
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 20px;
+      max-width: 90%;
+      margin: 0 auto;
+      height: calc(70vh - 120px); /* Adjust height to accommodate floating bar */
+    }
+
+    .box {
+      position: relative;
+      padding: 20px;
+      text-align: center;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: ;
+      filter: grayscale(100%);
+      pointer-events: none; /* Initially disable pointer events */
+      flex-direction: column; /* Align title and text vertically */
+    }
+	h1 {
+	font-weight: bold;
+    font-size: 22px;
+	}
+
+    .box.active {
+      filter: none;
+      pointer-events: auto; /* Enable pointer events for active boxes */
+    }
+
+    /* Box Colors */
+    .box:nth-child(1) { background-color: #f94144; }
+    .box:nth-child(2) { background-color: #f3722c; }
+    .box:nth-child(3) { background-color: #f8961e; }
+    .box:nth-child(4) { background-color: #f9c74f; }
+    .box:nth-child(5) { background-color: #90be6d; }
+    .box:nth-child(6) { background-color: #43aa8b; }
+    .box:nth-child(7) { background-color: #577590; }
+    .box:nth-child(8) { background-color: #277da1; }
+    .box:nth-child(9) { background-color: #4d908e; }
+
+    /* Icon Style */
+    .box .icon {
+      margin-bottom: 10px; /* Space between icon and title */
+      font-size: 24px; /* Adjusted icon size */
+    }
+
+    /* Floating Bar Style */
+    .floating-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(90% - 40px);
+      background-color: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start; /* Aligns items to the left */
+    }
+
+    .progress-bar {
+      width: 100%; /* Full width */
+      background-color: #ddd;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-left: 20px; /* Space between button and progress bar */
+    }
+
+    .progress {
+      height: 20px;
+      background-color: #4caf50;
+      width: 0;
+    }
+
+    .info-icon {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .guide-box {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    .guide-box .close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .confetti {
+      display: none;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 20px;
+      background-color: red;
+      opacity: 0;
+      animation: fall 4s linear infinite;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 1;
+      }
+    }
+
+    .reset-button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .reset-button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Congratulatory Message Style */
+    .congrats-message {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Freeman', serif;
+      font-size: 36px; /* Increased font size */
+      font-weight: bold;
+      color: #333;
+      z-index: 1001;
+      text-align: center;
+    }
+
+    /* Overlay Style */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 998; /* Below the guide box but above everything else */
+    }
+
+    /* Copyright Notice Style */
+    .copyright {
+      text-align: center;
+      margin-top: auto; /* Pushes copyright notice to the bottom */
+      padding: 20px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* Paragraph Style */
+    .box p {
+      font-size: 17px; /* Set paragraph font size */
+      margin: 0; /* Remove margin for better spacing */
+    }
+  </style>
+</head>
+<body>
+
+<!-- Centered Title -->
+<h1 class="title">Step-by-Step Practice Guide</h1>
+<p class="sub-title"><i>Click on each step in order to progress. The next step will unlock only after completing the previous one. Reset the progress at any time using the reset button.</i></p>
+
+<div class="grid">
+  <div class="box active" data-checked="false" data-step="1">
+    <i class="fas fa-music icon"></i> <!-- Icon added before title -->
+    <h1>Step 1: Get familiar</h1>
+    <p>Start by listening to several recordings of the piece to familiarize yourself with its overall structure, dynamics, and phrasing. Pay attention to the style and feel of the music.</p> <!-- Changeable text -->
+  </div>
+  <div class="box" data-checked="false" data-step="2">
+    <i class="fas fa-glasses icon"></i>
+    <h1>Step 2: Read the score</h1>
+    <p>Without playing, thoroughly examine the sheet music. Take note of key signatures, time signatures, tempo markings, dynamics, and any challenging sections (e.g., tricky rhythms or fast passages).</p>
+  </div>
+  <div class="box" data-checked="false" data-step="3">
+    <i class="fas fa-scissors icon"></i>
+    <h1>Step 3: Break the Piece into Sections</h1>
+    <p>Divide the piece into manageable sections or phrases. This makes learning less overwhelming and allows you to focus on smaller chunks. Aim to practice one section at a time, including the first note(s) of the following section.</p>
+  </div>
+  <div class="box" data-checked="false" data-step="4">
+    <i class="fas fa-guitar icon"></i>
+    <h1>Step 4: Practice Slowly</h1>
+    <p>Begin practicing the piece at a much slower tempo than marked. Focus on accuracy in fingering, rhythm, and articulation. Pay especially attention to the transition from one section to the other.</p>
+  </div>
+  <div class="box" data-checked="false" data-step="5">
+    <i class="fas fa-magnifying-glass icon"></i>
+    <h1>Step 5: Isolate Difficult Passages</h1>
+    <p>Identify any particularly challenging sections and isolate them. Practice these areas repetitively, gradually increasing the speed until you can play them comfortably.</p>
+  </div>
+  <div class="box" data-checked="false" data-step="6">
+    <i class="fas fa-shapes icon"></i>
+    <h1>Step 6: Explore musical ideas</h1>
+    <p>Explore the piece musically, try playing it with different emotions or movie scenes in mind. <i>How would it sound like it's a scene from a romantic movie?</i></p>
+  </div>
+  <div class="box" data-checked="false" data-step="7">
+    <i class="fas fa-masks-theater icon"></i>
+    <h1>Step 7: Create your own interpretation</h1>
+    <p>Once you’re comfortable with the notes, start incorporating the dynamics, phrasing, and articulations marked in the score. Don't forget to include your own musical ideas and interpretations. This will bring the piece to life.</p>
+  </div>
+  <div class="box" data-checked="false" data-step="8">
+    <i class="fas fa-star icon"></i>
+    <h1>Step 8: Practice Performance</h1>
+    <p>Play through the entire piece without stopping, focusing on continuity and expression. Treat it like a mini performance to simulate the pressure of playing in front of others.</p>
+  </div>
+  <div class="box" data-checked="false" data-step="9">
+    <i class="fas fa-gem icon"></i>
+    <h1>Step 9: Refine and Polish</h1>
+    <p>Review and polish the piece by addressing any remaining issues with phrasing, dynamics, or tricky transitions. Continue to refine your interpretation, aiming for a well-rounded, expressive performance.</p>
+  </div>
+</div>
+
+<!-- Floating Bar for Progress and Reset Button -->
+<div class="floating-bar">
+  <button class="reset-button">Reset</button>
+  <div class="progress-bar">
+    <div class="progress"></div>
+  </div>
+</div>
+
+<div class="info-icon">
+  <i class="fas fa-info-circle"></i>
+</div>
+
+<div class="guide-box">
+  <span class="close">&times;</span>
+  <h2>About</h2>
+  <p>A step-by-step guide for practicing music is invaluable as it provides a structured roadmap that allows learners to focus on one aspect at a time and build skills progressively. By setting specific goals and celebrating small achievements, musicians can maintain motivation, enhance focus, and improve retention. This approach fosters a consistent practice routine and ultimately makes the learning journey more enjoyable.</p>
+</div>
+
+<div class="overlay"></div> <!-- Overlay for info box -->
+<div class="confetti"></div> <!-- Confetti container -->
+
+<div class="congrats-message">Congratulations, you mastered a new piece! 🎉</div>
+
+<div class="copyright">© 2024 DutchUke. All rights reserved.</div> <!-- Copyright Notice -->
+
+<script>
+  let checkedBoxes = 0;
+  const totalBoxes = $('.box').length;
+
+  // Activate the step
+  function activateStep(step) {
+    $('.box[data-step="' + step + '"]').addClass('active'); // Make the current step active
+  }
+
+  // Handle box click event
+  $('.box').on('click', function() {
+    const step = $(this).data('step');
+    if ($(this).attr('data-checked') === 'false' && (step === 1 || $('.box[data-step="' + (step - 1) + '"]').attr('data-checked') === 'true')) {
+      $(this).css('background-color', 'rgba(255, 255, 255, 0.2)'); // Change to a lighter color
+      $(this).attr('data-checked', 'true'); // Mark as checked
+      checkedBoxes++;
+      updateProgress();
+      const nextStep = step + 1;
+      if (nextStep <= totalBoxes) {
+        activateStep(nextStep); // Activate the next step
+      }
+    }
+  });
+
+  // Update the progress bar
+  function updateProgress() {
+    let progressPercent = (checkedBoxes / totalBoxes) * 100;
+    $('.progress').css('width', progressPercent + '%');
+
+    // Show congratulatory message when progress reaches 100%
+    if (progressPercent === 100) {
+      showConfetti();
+      $('.congrats-message').fadeIn(); // Show the congratulatory message
+    }
+  }
+
+  // Show confetti animation
+  function showConfetti() {
+    const colors = ['#ff9b85', '#ff6f61', '#ff85a1', '#fbb1bd'];
+    for (let i = 0; i < 100; i++) {
+      const confettiPiece = $('<div class="confetti-piece"></div>');
+      confettiPiece.css({
+        left: Math.random() * 100 + 'vw',
+        backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+        animationDelay: Math.random() * 4 + 's'
+      });
+      $('.confetti').append(confettiPiece);
+    }
+    $('.confetti').show();
+  }
+
+  // Reset all boxes
+  $('.reset-button').on('click', function() {
+    $('.box').css('background-color', '').attr('data-checked', 'false').removeClass('active');
+    checkedBoxes = 0;
+    updateProgress();
+    $('.confetti').hide().empty();
+    $('.congrats-message').hide(); // Hide congratulatory message on reset
+    activateStep(1); // Restart from step 1
+    $('.box').removeClass('active'); // Reset active state
+    $('.box[data-step="1"]').addClass('active'); // Activate first step
+  });
+
+  // Info icon click event
+  $('.info-icon').on('click', function() {
+    $('.overlay').fadeIn(); // Show the overlay
+    $('.guide-box').fadeIn(); // Show the guide box
+  });
+
+  // Close the guide box
+  $('.guide-box .close').on('click', function() {
+    $('.overlay').fadeOut(); // Hide the overlay
+    $('.guide-box').fadeOut(); // Hide the guide box
+  });
+
+  // Start with the first step activated
+  activateStep(1);
+</script>
+
+</body>
+</html>
